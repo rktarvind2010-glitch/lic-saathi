@@ -10,6 +10,7 @@ import PolicyApplications from "./PolicyApplications";
 import Nominees from "./Nominees";
 import MedicalQuestionnaire from "./MedicalQuestionnaire";
 import { ClipboardList } from "lucide-react";
+import WhatsAppReminders from "./WhatsAppReminders";
 import {
   ShieldCheck,
   LayoutDashboard,
@@ -24,6 +25,7 @@ import {
   CalendarDays,
   TrendingUp,
   ChevronRight,
+MessageCircle,
 } from "lucide-react";
 
 const menuItems = [
@@ -192,6 +194,8 @@ if (!paymentError) {
   <CsvExport />
 ) : active === "Medical Questionnaire" ? (
   <MedicalQuestionnaire />
+) : active === "WhatsApp Premium Reminders" ? (
+  <WhatsAppReminders />
 ) : (
 
     <>
@@ -272,6 +276,16 @@ if (!paymentError) {
           <button onClick={() => setActive("Policies")}><span className="quick-icon"><FileText size={19} /></span><span><strong>Record a policy</strong><small>Organize policy information</small></span><ChevronRight size={17} /></button>
           <button onClick={() => setActive("Premium Payments")}><span className="quick-icon"><CreditCard size={19} /></span><span><strong>Track a premium</strong><small>Manage payment records</small></span><ChevronRight size={17} /></button>
           <button onClick={() => setActive("Reminders")}><span className="quick-icon"><Bell size={19} /></span><span><strong>Review reminders</strong><small>Keep upcoming dues in view</small></span><ChevronRight size={17} /></button>
+<button onClick={() => setActive("WhatsApp Premium Reminders")}>
+  <span className="quick-icon">
+    <MessageCircle size={19} />
+  </span>
+  <span>
+    <strong>WhatsApp Premium Reminder</strong>
+    <small>Prepare a premium due message</small>
+  </span>
+  <ChevronRight size={17} />
+</button>
           <button onClick={() => window.open("https://licindia.in/en/web/guest/premium-payment", "_blank", "noopener,noreferrer")}><span className="quick-icon"><CreditCard size={19} /></span><span><strong>Pay Premium Online</strong><small>Open official LIC payment page</small></span><ChevronRight size={17} /></button>
         </div>
       </article>

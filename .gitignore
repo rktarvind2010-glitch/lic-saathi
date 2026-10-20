@@ -26,3 +26,8 @@ dist-ssr
 # Environment secrets
 .env*
 !.env.example
+
+# Local backup folders
+backup-before-customer-master-*/
+
+backup-before-whatsapp-*/
