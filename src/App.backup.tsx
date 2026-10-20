@@ -168,7 +168,7 @@ if (!paymentError) {
           </button>
           <div className="breadcrumb">Workspace <span>/</span> {active}</div>
           <div className="top-actions">
-            <span className="preview-label">DEMO PREVIEW</span>
+            <span className="preview-label">AGENT PORTAL</span>
             <button className="icon-button" aria-label="Notifications"><Bell size={19} /></button>
           </div>
         </header>
@@ -296,7 +296,7 @@ if (!paymentError) {
       <p><strong>One workspace, organized records.</strong> The dashboard is currently a visual preview. Database, authentication and access controls will be configured next.</p>
     </section>
 
-    <footer>LIC Saathi Â· Independent record-management workspace Â· Demo preview</footer>
+    <footer>LIC Saathi Â· Independent record-management workspace Â· AGENT PORTAL</footer>
   </>
 )}
               </div>
