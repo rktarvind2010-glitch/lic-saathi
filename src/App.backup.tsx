@@ -9,9 +9,10 @@ import CsvExport from "./CsvExport";
 import PolicyApplications from "./PolicyApplications";
 import Nominees from "./Nominees";
 import MedicalQuestionnaire from "./MedicalQuestionnaire";
-import { ClipboardList } from "lucide-react";
+
 import WhatsAppReminders from "./WhatsAppReminders";
 import NewApplicationWizard from "./NewApplicationWizard";
+import SubscriptionPlans from "./SubscriptionPlans";
 import {
   ShieldCheck,
   LayoutDashboard,
@@ -26,7 +27,7 @@ import {
   CalendarDays,
   TrendingUp,
   ChevronRight,
-  FilePlus2,
+
 MessageCircle,
 } from "lucide-react";
 
@@ -37,15 +38,16 @@ const menuItems = [
   { label: "Premium Payments", icon: CreditCard },
   { label: "Reminders", icon: Bell },
   { label: "Settings", icon: Settings },
-{ label: "Customer Master", icon: Users },
-{ label: "Policy Applications", icon: FileText },
-{ label: "New Application", icon: FilePlus2 },
-{ label: "Nominee Details", icon: Users },
-{ label: "Medical Questionnaire", icon: ClipboardList },
+  { label: "Subscription Plans", icon: CreditCard },
 ];
 
 function App({ onLogout = () => {} }: { onLogout?: () => void } = {}) {
   const [active, setActive] = useState("Dashboard");
+  const [subscriptionSummary, setSubscriptionSummary] = useState<{
+    plan_name: string;
+    status: string;
+    monthly_price: number;
+  } | null>(null);
   const [resumeApplicationId, setResumeApplicationId] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [customerCount, setCustomerCount] = useState(0);
@@ -55,6 +57,32 @@ const [upcomingPremiumCount, setUpcomingPremiumCount] = useState(0);
   const [recentCustomers, setRecentCustomers] = useState<
     { id: string; full_name: string; phone: string | null }[]
   >([]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadSubscriptionSummary() {
+      const { data: authData } = await supabase.auth.getUser();
+      const user = authData.user;
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from("agent_subscriptions")
+        .select("plan_name, status, monthly_price")
+        .eq("agent_id", user.id)
+        .maybeSingle();
+
+      if (!error && mounted) {
+        setSubscriptionSummary(data);
+      }
+    }
+
+    void loadSubscriptionSummary();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     async function loadDashboardCustomers() {
@@ -198,6 +226,8 @@ if (!paymentError) {
   <PremiumPayments />
 ) : active === "Reminders" ? (
   <Reminders />
+) : active === "Subscription Plans" ? (
+  <SubscriptionPlans />
 ) : active === "Settings" ? (
   <div className="settings-page">
     <CsvExport />
@@ -234,8 +264,53 @@ if (!paymentError) {
             : `Your ${active.toLowerCase()} workspace. Features will be connected step by step.`}
         </p>
       </div>
-      <button className="primary-button" onClick={() => setActive("Customers")}>
-        <Plus size={18} /> Add Customer
+      <div className="dashboard-header-actions">
+        <button
+          className="secondary-button"
+          onClick={() => setActive("Policy Applications")}
+        >
+          Saved Applications
+        </button>
+        <button
+          className="primary-button"
+          onClick={() => {
+            setResumeApplicationId(null);
+            setActive("New Application");
+          }}
+        >
+          <Plus size={18} /> New Application
+        </button>
+        <button
+          className="secondary-button"
+          onClick={() => setActive("Customers")}
+        >
+          Add Customer
+        </button>
+      </div>
+    </section>
+
+    <section className="subscription-summary-card">
+      <div>
+        <p className="eyebrow">YOUR SUBSCRIPTION</p>
+        <h3>
+          {subscriptionSummary
+            ? `${subscriptionSummary.plan_name} Plan`
+            : "No plan selected"}
+        </h3>
+        <p>
+          {subscriptionSummary
+            ? `₹${subscriptionSummary.monthly_price}/month · Status: ${subscriptionSummary.status}`
+            : "Choose a plan to view your subscription here."}
+        </p>
+        {subscriptionSummary?.status === "pending" && (
+          <p>Your plan request is saved. Payment is not verified yet.</p>
+        )}
+      </div>
+      <button
+        className="secondary-button"
+        onClick={() => setActive("Subscription Plans")}
+      >
+        Manage Subscription
       </button>
     </section>
 
@@ -331,6 +406,11 @@ if (!paymentError) {
 }
 
 export default App;
+
+
+
+
+
 
 
 

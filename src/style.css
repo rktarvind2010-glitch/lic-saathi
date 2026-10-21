@@ -2630,3 +2630,624 @@ body { outline: 5px solid red !important; }
     padding: 5px 7px;
   }
 }
+
+/* Subscription Plans page */
+.subscription-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.subscription-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.subscription-heading h1 {
+  margin: 4px 0 8px;
+  color: #18263d;
+  font-size: clamp(25px, 3vw, 34px);
+}
+
+.subscription-heading-icon {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  flex-shrink: 0;
+  border-radius: 16px;
+  background: #eaf1ff;
+  color: #315fce;
+}
+
+.subscription-notice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border: 1px solid #dce6f8;
+  border-radius: 12px;
+  background: #f5f8ff;
+  color: #334b78;
+  font-size: 13px;
+}
+
+.subscription-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 20px;
+}
+
+.subscription-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 25px 22px;
+  border: 1px solid #e3e9f2;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(20, 40, 80, 0.04);
+}
+
+.subscription-popular {
+  border: 2px solid #4169e1;
+}
+
+.subscription-popular-label {
+  align-self: flex-start;
+  margin-bottom: 12px;
+  padding: 6px 9px;
+  border-radius: 6px;
+  background: #eaf0ff;
+  color: #3157bd;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.subscription-card h2 {
+  margin: 0 0 8px;
+  color: #18263d;
+  font-size: 22px;
+}
+
+.subscription-description {
+  min-height: 36px;
+  margin: 0;
+  color: #7b8799;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.subscription-price {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  margin: 22px 0;
+  color: #18263d;
+}
+
+.subscription-rupee {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.subscription-amount {
+  font-size: 43px;
+  font-weight: 800;
+  letter-spacing: -1.5px;
+}
+
+.subscription-period {
+  color: #7b8799;
+  font-size: 12px;
+}
+
+.subscription-divider {
+  height: 1px;
+  background: #edf0f5;
+}
+
+.subscription-feature-title {
+  margin: 20px 0 14px;
+  color: #263650;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.subscription-features {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 13px;
+  margin: 0 0 24px;
+  padding: 0;
+  list-style: none;
+}
+
+.subscription-features li {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  color: #526078;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.subscription-features li svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: #25845b;
+}
+
+.subscription-button {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #dbe3f0;
+  border-radius: 10px;
+  background: #fff;
+  color: #263650;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.subscription-button:hover {
+  background: #f4f7fc;
+}
+
+.subscription-button-primary {
+  border-color: #315fce;
+  background: #315fce;
+  color: #fff;
+}
+
+.subscription-button-primary:hover {
+  background: #254db0;
+}
+
+.subscription-selection {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid #dce6f8;
+  border-radius: 12px;
+  background: #f5f8ff;
+  color: #263650;
+}
+
+.subscription-selection p {
+  margin: 6px 0 0;
+  color: #64728a;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.subscription-selection button {
+  padding: 8px 12px;
+  border: 1px solid #dbe3f0;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.subscription-footer {
+  margin: 0;
+  color: #8791a2;
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+@media (max-width: 900px) {
+  .subscription-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .subscription-description {
+    min-height: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .subscription-card {
+    padding: 21px 18px;
+  }
+
+  .subscription-heading-icon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .subscription-selection {
+    align-items: flex-start;
+  }
+}
+
+.subscription-summary-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+  padding: 22px;
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 16px;
+  background: var(--card-background, #ffffff);
+}
+
+.subscription-summary-card h3 {
+  margin: 4px 0 8px;
+}
+
+.subscription-summary-card p {
+  margin: 5px 0;
+}
+
+
+/* ===== Dashboard header action buttons ===== */
+.dashboard-header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.dashboard-header-actions .primary-button,
+.dashboard-header-actions .secondary-button {
+  min-height: 43px;
+  padding: 11px 16px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  transition: background .2s ease, border-color .2s ease, transform .2s ease;
+}
+
+.dashboard-header-actions .primary-button:hover,
+.dashboard-header-actions .secondary-button:hover {
+  transform: translateY(-1px);
+}
+
+.dashboard-header-actions .secondary-button {
+  border: 1px solid #dce5f2;
+  background: #ffffff;
+  color: #34445d;
+}
+
+.dashboard-header-actions .secondary-button:hover {
+  border-color: #b9cdf2;
+  background: #f3f7ff;
+}
+
+/* Tablet and mobile */
+@media (max-width: 900px) {
+  .dashboard-header-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 600px) {
+  .dashboard-header-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 9px;
+  }
+
+  .dashboard-header-actions .primary-button,
+  .dashboard-header-actions .secondary-button {
+    width: 100%;
+    min-height: 44px;
+  }
+}
+
+/* ==========================================
+   LIC SAATHI — ROYAL WHITE & GOLD SUBSCRIPTION
+   ========================================== */
+
+.subscription-page {
+  color: #3d321e;
+  background:
+    radial-gradient(ellipse at top right, rgba(212, 181, 112, 0.12), transparent 42%),
+    linear-gradient(180deg, #fffefa 0%, #f8f6ef 100%);
+  border-radius: 24px;
+  padding: 28px;
+}
+
+.subscription-heading h1,
+.subscription-heading h2,
+.subscription-page h1,
+.subscription-page h2 {
+  color: #5a451e;
+  letter-spacing: -0.45px;
+}
+
+.subscription-heading-icon {
+  color: #a98236;
+  background: linear-gradient(145deg, #fffdf6, #eee0bd);
+  border: 1px solid #d7bd83;
+  box-shadow: 0 8px 24px rgba(169, 130, 54, 0.14);
+}
+
+.subscription-notice {
+  color: #715a2b;
+  background: linear-gradient(110deg, #fffdf6, #f5ecd7);
+  border: 1px solid #e2d1a9;
+  border-radius: 16px;
+  box-shadow: 0 5px 18px rgba(105, 81, 36, 0.05);
+}
+
+.subscription-grid {
+  gap: 22px;
+}
+
+.subscription-card {
+  background: linear-gradient(155deg, #ffffff 0%, #fffdf7 100%);
+  border: 1px solid #e6dcc5;
+  border-radius: 22px;
+  box-shadow: 0 12px 32px rgba(83, 65, 31, 0.07);
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.subscription-card:hover {
+  transform: translateY(-4px);
+  border-color: #c6a45d;
+  box-shadow: 0 18px 36px rgba(126, 95, 35, 0.13);
+}
+
+.subscription-card h2 {
+  color: #5a451e;
+}
+
+.subscription-description,
+.subscription-period {
+  color: #857654;
+}
+
+.subscription-price {
+  color: #9c762d;
+}
+
+.subscription-rupee,
+.subscription-amount {
+  color: #9c762d;
+}
+
+.subscription-divider {
+  background: linear-gradient(90deg, transparent, #d8c18e, transparent);
+}
+
+.subscription-feature-title {
+  color: #705a30;
+}
+
+.subscription-features li svg {
+  color: #ad8738;
+  flex-shrink: 0;
+}
+
+.subscription-popular {
+  border: 1.5px solid #bd9a50;
+  box-shadow: 0 16px 36px rgba(169, 130, 54, 0.14);
+}
+
+.subscription-popular-label {
+  color: #fffdf7;
+  background: linear-gradient(120deg, #b18b3e, #806020);
+  border-radius: 999px;
+  box-shadow: 0 5px 12px rgba(126, 96, 32, 0.2);
+}
+
+.subscription-button {
+  border: 1px solid #b4934e;
+  border-radius: 12px;
+  background: #fffdf8;
+  color: #806020;
+  font-weight: 650;
+  transition: all 180ms ease;
+}
+
+.subscription-button:hover:not(:disabled) {
+  background: #f6edda;
+  border-color: #9d782e;
+  transform: translateY(-1px);
+}
+
+.subscription-button-primary {
+  color: #ffffff;
+  background: linear-gradient(120deg, #b18b3e, #806020);
+  border-color: #a17c32;
+  box-shadow: 0 7px 18px rgba(144, 106, 36, 0.22);
+}
+
+.subscription-button-primary:hover:not(:disabled) {
+  background: linear-gradient(120deg, #c19b4d, #8b6926);
+  box-shadow: 0 10px 22px rgba(144, 106, 36, 0.28);
+}
+
+/* Payment panel */
+.subscription-payment-form {
+  margin: 30px 0;
+  padding: 30px;
+  border: 1px solid #dfcca0;
+  border-radius: 26px;
+  background:
+    radial-gradient(ellipse at top right, rgba(213, 183, 117, 0.14), transparent 48%),
+    linear-gradient(145deg, #ffffff 0%, #fbf8ef 100%);
+  box-shadow: 0 18px 45px rgba(88, 66, 27, 0.09);
+}
+
+.subscription-payment-form h2 {
+  margin-top: 0;
+  color: #5a451e;
+  font-size: clamp(23px, 3vw, 30px);
+}
+
+.subscription-payment-amount {
+  color: #99732d;
+  font-size: 20px;
+  font-weight: 750;
+}
+
+/* Keep the QR compact and responsive */
+.subscription-qr-wrap {
+  width: min(100%, 300px);
+  margin: 22px auto;
+  padding: 20px;
+  text-align: center;
+  background: #ffffff;
+  border: 1px solid #e3d4b2;
+  border-radius: 20px;
+  box-shadow: 0 10px 28px rgba(102, 79, 34, 0.08);
+}
+
+.subscription-qr-image {
+  display: block;
+  width: 180px;
+  height: 180px;
+  max-width: 100%;
+  object-fit: contain;
+  margin: 0 auto 12px;
+  padding: 7px;
+  background: #ffffff;
+  border: 1px solid #eee5d2;
+  border-radius: 12px;
+}
+
+.subscription-qr-wrap p {
+  margin: 8px 0 0;
+  color: #7c6a48;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.subscription-field {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin: 18px 0;
+  color: #65502a;
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.subscription-field input {
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 14px;
+  color: #40351f;
+  background: #fffefa;
+  border: 1px solid #dfd1b1;
+  border-radius: 12px;
+  outline: none;
+  font: inherit;
+  font-weight: 400;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.subscription-field input:focus {
+  border-color: #b18b3e;
+  box-shadow: 0 0 0 3px rgba(177, 139, 62, 0.13);
+}
+
+.subscription-payment-form .subscription-button {
+  width: 100%;
+  min-height: 50px;
+  margin-top: 8px;
+}
+
+.subscription-payment-note {
+  margin-top: 16px;
+  color: #857654;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.subscription-selection {
+  border: 1px solid #e0cfaa;
+  border-radius: 16px;
+  background: #fffdf7;
+  box-shadow: 0 6px 20px rgba(83, 65, 31, 0.05);
+}
+
+.subscription-footer {
+  color: #857654;
+  line-height: 1.7;
+}
+
+@media (max-width: 600px) {
+  .subscription-page {
+    padding: 14px;
+    border-radius: 16px;
+  }
+
+  .subscription-payment-form {
+    padding: 18px 14px;
+    border-radius: 20px;
+  }
+
+  .subscription-qr-wrap {
+    padding: 14px;
+    width: min(100%, 250px);
+  }
+
+  .subscription-qr-image {
+    width: 160px;
+    height: 160px;
+  }
+
+  .subscription-card:hover {
+    transform: none;
+  }
+}
+
+
+/* Fix: Subscription payment QR card spacing and button overlap */
+.subscription-qr-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  box-sizing: border-box;
+}
+
+.subscription-qr-wrap > * {
+  position: static;
+  float: none;
+  flex-shrink: 0;
+}
+
+.subscription-qr-wrap .subscription-qr-image {
+  display: block;
+  margin: 0 auto 6px;
+}
+
+.subscription-qr-wrap p {
+  width: 100%;
+  margin: 0;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.subscription-qr-wrap a.subscription-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 48px;
+  margin: 4px 0;
+  padding: 12px 10px;
+  line-height: 1.4;
+  text-align: center;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-decoration: none;
+}
+
