@@ -1,4 +1,4 @@
-
+﻿
 import { useEffect, useState, type FormEvent } from "react";
 import { supabase } from "./lib/supabase";
 import {
@@ -60,7 +60,9 @@ const statusLabels: Record<string, string> = Object.fromEntries(
   statuses.map((status) => [status.value, status.label])
 );
 
-export default function PolicyApplications() {
+type PolicyApplicationsProps = { onResumeDraft?: (applicationId: string) => void };
+
+export default function PolicyApplications({ onResumeDraft }: PolicyApplicationsProps) {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [applications, setApplications] = useState<Application[]>([]);
   const [form, setForm] = useState(emptyForm);
@@ -70,6 +72,36 @@ export default function PolicyApplications() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
+
+  const [selectedApplication, setSelectedApplication] =
+    useState<Application | null>(null);
+  const [detailNominees, setDetailNominees] = useState<
+    {
+      id: string;
+      full_name: string;
+      relationship: string;
+      date_of_birth: string | null;
+      share_percentage: number;
+    }[]
+  >([]);
+  const [detailMedicalAnswers, setDetailMedicalAnswers] = useState<
+    { id: string; question_label: string; answer: string }[]
+  >([]);
+    const [detailDocuments, setDetailDocuments] = useState<
+    {
+      id: string;
+      document_type: string;
+      status: string;
+      original_file_name: string | null;
+      storage_path: string | null;
+      file_size_bytes: number | null;
+    }[]
+  >([]);
+  const [documentType, setDocumentType] = useState("identity_proof");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploadingDocument, setUploadingDocument] = useState(false);
+  const [downloadingDocumentId, setDownloadingDocumentId] = useState("");
+  const [detailsLoading, setDetailsLoading] = useState(false);
 
   async function loadData() {
     setLoading(true);
@@ -226,6 +258,215 @@ export default function PolicyApplications() {
     setSaving(false);
   }
 
+
+  async function viewApplication(application: Application) {
+    setSelectedApplication(application);
+    setDetailNominees([]);
+    setDetailMedicalAnswers([]);
+    setDetailDocuments([]);
+    setDetailsLoading(true);
+    setError("");
+
+    const [nomineeResult, medicalResult, documentResult] =
+      await Promise.all([
+        supabase
+          .from("policy_nominees")
+          .select(
+            "id, full_name, relationship, date_of_birth, share_percentage"
+          )
+          .eq("application_id", application.id),
+        supabase
+          .from("application_medical_answers")
+          .select("id, question_label, answer")
+          .eq("application_id", application.id),
+        supabase
+          .from("application_documents")
+          .select(
+  "id, document_type, status, original_file_name, storage_path, file_size_bytes"
+)
+          .eq("application_id", application.id),
+      ]);
+
+    if (nomineeResult.error) {
+      setError("Nominee details: " + nomineeResult.error.message);
+    } else {
+      setDetailNominees(nomineeResult.data ?? []);
+    }
+
+    if (medicalResult.error) {
+      setError((previous) =>
+        previous
+          ? previous + " | Medical details: " + medicalResult.error.message
+          : "Medical details: " + medicalResult.error.message
+      );
+    } else {
+      setDetailMedicalAnswers(medicalResult.data ?? []);
+    }
+
+    if (documentResult.error) {
+      setError((previous) =>
+        previous
+          ? previous + " | Documents: " + documentResult.error.message
+          : "Documents: " + documentResult.error.message
+      );
+    } else {
+      setDetailDocuments(documentResult.data ?? []);
+    }
+
+    setDetailsLoading(false);
+  }
+
+  async function uploadDocument() {
+    if (!selectedApplication) {
+      setError("Open an application first.");
+      return;
+    }
+
+    if (!selectedFile) {
+      setError("Please choose a PDF, JPG, or PNG file.");
+      return;
+    }
+
+    const allowedTypes = [
+      "application/pdf",
+      "image/jpeg",
+      "image/png",
+    ];
+
+    if (!allowedTypes.includes(selectedFile.type)) {
+      setError("Only PDF, JPG, and PNG files are allowed.");
+      return;
+    }
+
+    if (selectedFile.size > 5 * 1024 * 1024) {
+      setError("File size must be 5 MB or less.");
+      return;
+    }
+
+    setUploadingDocument(true);
+    setError("");
+    setMessage("");
+
+    try {
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError) throw userError;
+      if (!user) throw new Error("Please sign in again.");
+
+      const safeName = selectedFile.name.replace(
+        /[^a-zA-Z0-9._-]/g,
+        "_"
+      );
+
+      const storagePath =
+        `${user.id}/${selectedApplication.id}/` +
+        `${crypto.randomUUID()}-${safeName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("lic-customer-documents")
+        .upload(storagePath, selectedFile, {
+          contentType: selectedFile.type,
+          upsert: false,
+        });
+
+      if (uploadError) throw uploadError;
+
+      const { error: insertError } = await supabase
+        .from("application_documents")
+        .insert({
+          agent_id: user.id,
+          application_id: selectedApplication.id,
+          document_type: documentType,
+          status: "received",
+          storage_path: storagePath,
+          original_file_name: selectedFile.name,
+          content_type: selectedFile.type,
+          file_size_bytes: selectedFile.size,
+        });
+
+      if (insertError) {
+        await supabase.storage
+          .from("lic-customer-documents")
+          .remove([storagePath]);
+        throw insertError;
+      }
+
+      const { data, error: listError } = await supabase
+        .from("application_documents")
+        .select(
+          "id, document_type, status, original_file_name, storage_path, file_size_bytes"
+        )
+        .eq("application_id", selectedApplication.id)
+        .order("created_at", { ascending: false });
+
+      if (listError) throw listError;
+
+      setDetailDocuments(data ?? []);
+      setSelectedFile(null);
+      setMessage("Document uploaded successfully.");
+    } catch (err) {
+      console.error("LIC Saathi document upload error:", err);
+
+      const detail =
+        err instanceof Error
+          ? err.message
+          : typeof err === "object" && err !== null
+            ? JSON.stringify(err)
+            : String(err);
+
+      setError("Document upload failed: " + detail);
+    } finally {
+      setUploadingDocument(false);
+    }
+  }
+
+  async function downloadDocument(
+    file: {
+      id: string;
+      document_type: string;
+      status: string;
+      original_file_name: string | null;
+      storage_path: string | null;
+      file_size_bytes: number | null;
+    }
+  ) {
+    if (!file.storage_path) {
+      setError("No stored file path is available.");
+      return;
+    }
+
+    setDownloadingDocumentId(file.id);
+    setError("");
+
+    // Open a tab immediately to reduce popup-blocking risk.
+    const downloadTab = window.open("about:blank", "_blank");
+
+    try {
+      const { data, error: signedUrlError } = await supabase.storage
+        .from("lic-customer-documents")
+        .createSignedUrl(file.storage_path, 60);
+
+      if (signedUrlError) throw signedUrlError;
+
+      if (downloadTab) {
+        downloadTab.location.href = data.signedUrl;
+      } else {
+        window.location.assign(data.signedUrl);
+      }
+    } catch (err) {
+      downloadTab?.close();
+      setError(
+        "Document access failed: " +
+          (err instanceof Error ? err.message : "Unknown error.")
+      );
+    } finally {
+      setDownloadingDocumentId("");
+    }
+  }
+
   function editApplication(application: Application) {
     setEditingId(application.id);
     setForm({
@@ -279,7 +520,7 @@ export default function PolicyApplications() {
     <section className="customer-master policy-applications">
       <div className="welcome-row">
         <div>
-          <p className="eyebrow">LIC SAATHI · NEW BUSINESS</p>
+          <p className="eyebrow">LIC SAATHI Â· NEW BUSINESS</p>
           <h1>Policy Applications</h1>
           <p className="subtitle">
             Prepare, track and update proposed policy applications for your
@@ -329,7 +570,7 @@ export default function PolicyApplications() {
                 {customers.map((customer) => (
                   <option key={customer.id} value={customer.id}>
                     {customer.full_name}
-                    {customer.phone ? ` — ${customer.phone}` : ""}
+                    {customer.phone ? ` â€” ${customer.phone}` : ""}
                   </option>
                 ))}
               </select>
@@ -602,13 +843,33 @@ export default function PolicyApplications() {
                         </span>
                       </td>
                       <td style={{ padding: 12 }}>
-                        <button
-                          type="button"
-                          className="secondary-button"
-                          onClick={() => editApplication(application)}
-                        >
-                          Edit
-                        </button>
+                        
+<div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+  {application.application_status === "draft" && onResumeDraft && (
+    <button
+      type="button"
+      className="secondary-button"
+      onClick={() => onResumeDraft(application.id)}
+    >
+      Resume Draft
+    </button>
+  )}
+  <button
+    type="button"
+    className="secondary-button"
+    onClick={() => void viewApplication(application)}
+  >
+    View Details
+  </button>
+  <button
+    type="button"
+    className="secondary-button"
+    onClick={() => editApplication(application)}
+  >
+    Edit
+  </button>
+</div>
+
                       </td>
                     </tr>
                   );
@@ -618,6 +879,229 @@ export default function PolicyApplications() {
           </div>
         )}
       </div>
+    
+      {selectedApplication && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="application-details-title"
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 1000,
+            background: "rgba(15, 23, 42, 0.65)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 16,
+          }}
+        >
+          <div
+            className="panel"
+            style={{
+              width: "100%",
+              maxWidth: 760,
+              maxHeight: "90vh",
+              overflowY: "auto",
+              background: "white",
+            }}
+          >
+            <div className="panel-heading">
+              <div>
+                <h3 id="application-details-title">
+                  Application Details
+                </h3>
+                <p>
+                  {selectedApplication.application_number ||
+                    "Application reference not provided"}
+                </p>
+              </div>
+              <button
+                type="button"
+                className="secondary-button"
+                onClick={() => setSelectedApplication(null)}
+              >
+                Close
+              </button>
+            </div>
+
+            {detailsLoading ? (
+              <p>Loading saved details...</p>
+            ) : (
+              <>
+                <h3>Policy Information</h3>
+                <div className="form-grid">
+                  <p>
+                    <strong>Customer:</strong>{" "}
+                    {customers.find(
+                      (c) => c.id === selectedApplication.customer_id
+                    )?.full_name ?? "Customer"}
+                  </p>
+                  <p>
+                    <strong>Plan:</strong>{" "}
+                    {selectedApplication.plan_name || "Not provided"}
+                  </p>
+                  <p>
+                    <strong>Sum Assured:</strong>{" "}
+                    ₹{Number(
+                      selectedApplication.proposed_sum_assured ?? 0
+                    ).toLocaleString("en-IN")}
+                  </p>
+                  <p>
+                    <strong>Premium:</strong>{" "}
+                    ₹{Number(
+                      selectedApplication.proposed_premium ?? 0
+                    ).toLocaleString("en-IN")}
+                  </p>
+                  <p>
+                    <strong>Frequency:</strong>{" "}
+                    {selectedApplication.premium_frequency || "Not provided"}
+                  </p>
+                  <p>
+                    <strong>Policy Term:</strong>{" "}
+                    {selectedApplication.policy_term_years ?? "â€”"} years
+                  </p>
+                  <p>
+                    <strong>Payment Term:</strong>{" "}
+                    {selectedApplication.premium_payment_term_years ?? "â€”"} years
+                  </p>
+                  <p>
+                    <strong>Status:</strong>{" "}
+                    {statusLabels[selectedApplication.application_status] ??
+                      selectedApplication.application_status}
+                  </p>
+                  <p>
+                    <strong>Proposed Start:</strong>{" "}
+                    {selectedApplication.proposed_start_date || "Not set"}
+                  </p>
+                </div>
+
+                <h3>Notes</h3>
+                <p>{selectedApplication.notes || "No notes added."}</p>
+
+                <h3>Nominee Details</h3>
+                {detailNominees.length === 0 ? (
+                  <p>No nominee records found for this application.</p>
+                ) : (
+                  detailNominees.map((nominee) => (
+                    <div
+                      key={nominee.id}
+                      style={{
+                        padding: 12,
+                        border: "1px solid #e5ebf2",
+                        borderRadius: 8,
+                        marginBottom: 8,
+                      }}
+                    >
+                      <strong>{nominee.full_name}</strong>
+                      <p>Relationship: {nominee.relationship}</p>
+                      <p>
+                        Date of birth: {nominee.date_of_birth || "Not provided"}
+                      </p>
+                      <p>Share: {nominee.share_percentage}%</p>
+                    </div>
+                  ))
+                )}
+
+                <h3>Medical Questionnaire</h3>
+                {detailMedicalAnswers.length === 0 ? (
+                  <p>No saved medical answers found.</p>
+                ) : (
+                  detailMedicalAnswers.map((answer) => (
+                    <div
+                      key={answer.id}
+                      style={{
+                        padding: 12,
+                        borderBottom: "1px solid #e5ebf2",
+                      }}
+                    >
+                      <strong>{answer.question_label}</strong>
+                      <p style={{ whiteSpace: "pre-wrap" }}>
+                        {answer.answer}
+                      </p>
+                    </div>
+                  ))
+                )}
+
+                <h3>Documents</h3>
+
+              <div style={{ display: "grid", gap: 10, marginBottom: 20 }}>
+                <label>
+                  Document type
+                  <select
+                    value={documentType}
+                    onChange={(e) => setDocumentType(e.target.value)}
+                    style={{ display: "block", width: "100%", padding: 8 }}
+                  >
+                    <option value="identity_proof">Identity proof</option>
+                    <option value="address_proof">Address proof</option>
+                    <option value="age_proof">Age proof</option>
+                    <option value="photo">Photograph</option>
+                    <option value="signature">Signature</option>
+                    <option value="income_proof">Income proof</option>
+                    <option value="medical_report">Medical report</option>
+                    <option value="other">Other</option>
+                  </select>
+                </label>
+
+                <input
+                  type="file"
+                  accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                  onChange={(e) => setSelectedFile(e.target.files?.[0] ?? null)}
+                />
+
+                <p>Allowed: PDF, JPG, PNG. Maximum size: 5 MB.</p>
+
+                <button
+                  type="button"
+                  disabled={uploadingDocument || !selectedFile}
+                  onClick={() => void uploadDocument()}
+                >
+                  {uploadingDocument ? "Uploading..." : "Upload document"}
+                </button>
+              </div>
+
+              {detailDocuments.length === 0 ? (
+                <p>No documents uploaded for this application.</p>
+              ) : (
+                detailDocuments.map((file) => (
+                  <div
+                    key={file.id}
+                    style={{
+                      padding: 12,
+                      borderBottom: "1px solid #e5ebf2",
+                    }}
+                  >
+                    <strong>{file.original_file_name || file.document_type}</strong>
+                    <p>Type: {file.document_type}</p>
+                    <p>Status: {file.status}</p>
+                    <p>
+                      Size:{" "}
+                      {file.file_size_bytes == null
+                        ? "Unknown"
+                        : `${(file.file_size_bytes / (1024 * 1024)).toFixed(2)} MB`}
+                    </p>
+                    <button
+                      type="button"
+                      disabled={!file.storage_path || downloadingDocumentId === file.id}
+                      onClick={() => void downloadDocument(file)}
+                    >
+                      {downloadingDocumentId === file.id
+                        ? "Preparing..."
+                        : "View / Download"}
+                    </button>
+                  </div>
+                ))
+              )}
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </section>
   );
 }
+
+
+
+

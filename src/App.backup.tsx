@@ -1,4 +1,4 @@
-import Policies from "./Policies";
+﻿import Policies from "./Policies";
 import Customers from "./Customers";
 import CustomerMaster from "./CustomerMaster";
 import PremiumPayments from "./PremiumPayments";
@@ -11,6 +11,7 @@ import Nominees from "./Nominees";
 import MedicalQuestionnaire from "./MedicalQuestionnaire";
 import { ClipboardList } from "lucide-react";
 import WhatsAppReminders from "./WhatsAppReminders";
+import NewApplicationWizard from "./NewApplicationWizard";
 import {
   ShieldCheck,
   LayoutDashboard,
@@ -25,6 +26,7 @@ import {
   CalendarDays,
   TrendingUp,
   ChevronRight,
+  FilePlus2,
 MessageCircle,
 } from "lucide-react";
 
@@ -37,12 +39,14 @@ const menuItems = [
   { label: "Settings", icon: Settings },
 { label: "Customer Master", icon: Users },
 { label: "Policy Applications", icon: FileText },
+{ label: "New Application", icon: FilePlus2 },
 { label: "Nominee Details", icon: Users },
 { label: "Medical Questionnaire", icon: ClipboardList },
 ];
 
-function App() {
+function App({ onLogout = () => {} }: { onLogout?: () => void } = {}) {
   const [active, setActive] = useState("Dashboard");
+  const [resumeApplicationId, setResumeApplicationId] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [customerCount, setCustomerCount] = useState(0);
 const [activePolicyCount, setActivePolicyCount] = useState(0);
@@ -115,7 +119,7 @@ if (!paymentError) {
   const stats = [
     { title: "Total Customers", value: String(customerCount), note: "Registered customers", icon: Users },
     { title: "Active Policies", value: String(activePolicyCount), note: "Active policies recorded", icon: ShieldCheck },
-    { title: "Premium Collected", value: `₹${collectedTotal.toLocaleString("en-IN")}`, note: "Payments recorded", icon: IndianRupee },
+    { title: "Premium Collected", value: `â‚¹${collectedTotal.toLocaleString("en-IN")}`, note: "Payments recorded", icon: IndianRupee },
     { title: "Upcoming Premiums", value: String(upcomingPremiumCount), note: "Due in the next 30 days", icon: CalendarDays },
   ];
 
@@ -175,15 +179,19 @@ if (!paymentError) {
 
         <div className="page-content">
   
-{active === "Customers" ? (
+
+{active === "New Application" ? (
+<NewApplicationWizard initialApplicationId={resumeApplicationId} onResumeLoaded={() => setResumeApplicationId(null)} />
+) : active === "Customers" ? (
   <Customers />
+
 ) : active === "Customer Master" ? (
   <CustomerMaster />
 ) : active === "Nominee Details" ? (
   <Nominees />
 ) : active === "Policy Applications" ? (
   
-  <PolicyApplications />
+<PolicyApplications onResumeDraft={(id) => { setResumeApplicationId(id); setActive("New Application"); }} />
 ) : active === "Policies" ? (
   <Policies />
 ) : active === "Premium Payments" ? (
@@ -191,7 +199,24 @@ if (!paymentError) {
 ) : active === "Reminders" ? (
   <Reminders />
 ) : active === "Settings" ? (
-  <CsvExport />
+  <div className="settings-page">
+    <CsvExport />
+
+    <section className="settings-account-card">
+      <div>
+        <h2>Account Settings</h2>
+        <p>Manage your LIC Saathi account.</p>
+      </div>
+
+      <button
+        type="button"
+        className="settings-logout-button"
+        onClick={onLogout}
+      >
+        Log out
+      </button>
+    </section>
+  </div>
 ) : active === "Medical Questionnaire" ? (
   <MedicalQuestionnaire />
 ) : active === "WhatsApp Premium Reminders" ? (
@@ -296,7 +321,7 @@ if (!paymentError) {
       <p><strong>One workspace, organized records.</strong> The dashboard is currently a visual preview. Database, authentication and access controls will be configured next.</p>
     </section>
 
-    <footer>LIC Saathi Â· Independent record-management workspace Â· AGENT PORTAL</footer>
+    <footer>LIC Saathi Ã‚Â· Independent record-management workspace Ã‚Â· AGENT PORTAL</footer>
   </>
 )}
               </div>
@@ -306,6 +331,7 @@ if (!paymentError) {
 }
 
 export default App;
+
 
 
 

@@ -2545,4 +2545,88 @@ body { outline: 5px solid red !important; }
     transition: none;
   }
 }
+/* Header alignment */
+.topbar {
+  gap: 16px;
+  min-width: 0;
+}
 
+.breadcrumb {
+  min-width: 0;
+  flex: 1;
+}
+
+.top-actions {
+  flex-shrink: 0;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.preview-label {
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Settings account section */
+.settings-page {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.settings-account-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 24px;
+  background: #ffffff;
+  border: 1px solid #e5eaf2;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(20, 40, 80, 0.04);
+}
+
+.settings-account-card h2 {
+  margin: 0 0 8px;
+  color: #18263d;
+  font-size: 18px;
+}
+
+.settings-account-card p {
+  margin: 0;
+  color: #7e8a9d;
+  font-size: 13px;
+}
+
+.settings-logout-button {
+  flex-shrink: 0;
+  border: 1px solid #f0caca;
+  border-radius: 9px;
+  padding: 11px 18px;
+  background: #fff5f5;
+  color: #bd3030;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.settings-logout-button:hover {
+  background: #ffe8e8;
+}
+
+@media (max-width: 600px) {
+  .settings-account-card {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .top-actions {
+    gap: 8px;
+  }
+
+  .preview-label {
+    font-size: 8px;
+    padding: 5px 7px;
+  }
+}

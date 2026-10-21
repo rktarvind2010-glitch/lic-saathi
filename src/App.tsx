@@ -93,19 +93,8 @@ export default function App() {
   }
 
   if (session) {
-    return (
-      <>
-        <button
-          className="auth-logout"
-          onClick={handleLogout}
-          type="button"
-        >
-          Log out
-        </button>
-        <LegacyDashboard />
-      </>
-    );
-  }
+  return <LegacyDashboard onLogout={handleLogout} />;
+}
 
   return (
     
